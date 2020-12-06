@@ -49,7 +49,7 @@ global.config = {
     player_colors = {
         enabled = true
     },
-    -- saves players' lives if they have a small-plane in their inventory, also adds the small-plane to the market and must therefor be loaded first
+    -- saves players' lives if they have a player-port in their inventory, also adds the player-port to the market and must therefor be loaded first
     train_saviour = {
         enabled = true
     },
@@ -57,6 +57,12 @@ global.config = {
     infinite_storage_chest = {
         enabled = false,
         cost = 100
+    },
+    -- Allows removing landfill using the deconstruction planner.
+    landfill_remover = {
+        enabled = true,
+        -- The tile that is used to replace landfill when it is removed.
+        revert_tile = 'water-mud'
     },
     -- adds a command to scale UPS and movement speed. Use with caution as it might break scenarios that modify movement speed
     performance = {
@@ -79,10 +85,6 @@ global.config = {
     tasklist = {
         enabled = true
     },
-    -- enables the blueprint helper
-    blueprint_helper = {
-        enabled = true
-    },
     -- enables score and tracking thereof
     score = {
         enabled = true,
@@ -100,7 +102,10 @@ global.config = {
     },
     -- adds a paint brush
     paint = {
-        enabled = true
+        enabled = true,
+        -- Sometimes the hidden tile information is lost, the fallback tile will be used when removing those tiles.
+        fallback_hidden_tile = 'dirt-6',
+        prevent_on_landfill = true
     },
     -- autofill turrets with ammo
     autofill = {
@@ -200,10 +205,8 @@ global.config = {
                 {name = 'substation', count = 50},
                 {name = 'roboport', count = 10},
                 {name = 'infinity-chest', count = 10},
-                {name = 'small-plane', count = 2},
+                {name = 'player-port', count = 2},
                 {name = 'coin', count = 20000},
-                {name = 'rocket-part', count = 2},
-                {name = 'computer', count = 2},
                 {name = 'infinity-pipe', count = 10},
                 {name = 'heat-interface', count = 10},
                 {name = 'selection-tool', count = 1}
@@ -414,7 +417,7 @@ global.config = {
         -- reduce delay for each level of the tech
         techs = {
             ['weapon-shooting-speed'] = {{turret_type = 'ammo-turret', amount = 60 * 26 / 6}},
-            ['laser-turret-speed'] = {{turret_type = 'electric-turret', amount = 60 * 12 / 7}},
+            ['laser-shooting-speed'] = {{turret_type = 'electric-turret', amount = 60 * 12 / 7}},
             ['refined-flammables'] = {{turret_type = 'fluid-turret', amount = 60 * 17 / 7}},
             ['artillery-shell-speed'] = {{turret_type = 'artillery-turret', amount = 60 * 2}}
         }

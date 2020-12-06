@@ -1116,7 +1116,8 @@ local artillery_target_entities = {
     'locomotive',
     'cargo-wagon',
     'fluid-wagon',
-    'artillery-wagon'
+    'artillery-wagon',
+    'spidertron'
 }
 
 local artillery_target_callback =
@@ -1142,6 +1143,16 @@ local artillery_target_callback =
                 target = entity,
                 speed = 1.5
             }
+            if entity.name == "spidertron" then
+                -- fire a rocket as well as artillery-projectile since artillery-projectile doesn't damage spidertrons
+                -- Balance note: 1 rocket per artillery kills spidertron shield fast but takes ~ 1 minute to kill the spidertron
+                entity.surface.create_entity {
+                    name = 'rocket',
+                    position = position,
+                    target = entity,
+                    speed = 1.5
+                }
+            end
         end
     end
 )
@@ -1560,6 +1571,16 @@ Public.deactivate_callback =
     end
 )
 
+
+Public.scenario_chest_callback = Token.register(function(chest)
+    if not chest or not chest.valid then
+        return
+    end
+
+    chest.destructible = false
+    chest.minable = false
+end)
+
 local function turret_died(event)
     local entity = event.entity
     if not entity or not entity.valid then
@@ -1651,7 +1672,7 @@ Public.market_set_items_callback =
 
             Retailer.set_item(
                 market_id,
-                {name = item.name, price = price, name_label = item.name_label, description = item.description}
+                {name = item.name, type = item.type, price = price, name_label = item.name_label, sprite = item.sprite, description = item.description}
             )
         end
     end

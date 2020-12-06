@@ -1,6 +1,7 @@
 local Token = require 'utils.token'
 local Event = require 'utils.event'
 local Global = require 'utils.global'
+local Styles = require 'resources.styles'
 
 local tostring = tostring
 local next = next
@@ -22,6 +23,8 @@ Gui.token =
 local top_elements = {}
 local on_visible_handlers = {}
 local on_pre_hidden_handlers = {}
+
+Gui._top_elements = top_elements
 
 function Gui.uid_name()
     return tostring(Token.uid())
@@ -246,7 +249,7 @@ Event.add(
         }
         local style = b.style
         style.width = 18
-        style.height = 38
+        style.height = 40
         style.left_padding = 0
         style.top_padding = 0
         style.right_padding = 0
@@ -293,6 +296,20 @@ Gui.on_click(
         end
     end
 )
+
+function Gui.make_close_button(parent, name)
+    local button =
+        parent.add {
+        type = 'button',
+        name = name,
+        caption = {'common.close_button'},
+        style = 'back_button'
+    }
+
+    Styles.default_close(button.style)
+
+    return button
+end
 
 if _DEBUG then
     local concat = table.concat

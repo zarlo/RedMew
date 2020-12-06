@@ -612,7 +612,7 @@ local function draw_main_frame(left, player)
         tooltip = {'player_list.poke_notify_tooltip'}
     }
 
-    frame.add {type = 'button', name = main_button_name, caption = {'player_list.close_caption'}}
+    Gui.make_close_button(frame, main_button_name)
 
     local settings = player_settings[player_index] or get_default_player_settings()
     local data = {
@@ -646,12 +646,13 @@ local function toggle(event)
 
     if main_frame then
         remove_main_frame(main_frame, player)
-        main_button.style = 'icon_button'
+        main_button.style = 'slot_button'
     else
-        main_button.style = 'slot_sized_button'
+        main_button.style = 'highlighted_tool_button'
         local style = main_button.style
-        style.width = 38
-        style.height = 38
+        style.width = 40
+        style.height = 40
+        style.padding = 0
 
         draw_main_frame(left, player)
     end
@@ -668,38 +669,23 @@ local function tick()
     end
 end
 
-local function player_joined(event)
+local function player_created(event)
     local player = game.get_player(event.player_index)
     if not player or not player.valid then
         return
     end
 
-    local gui = player.gui
-    local top = gui.top
-
-    if not top[main_button_name] then
-        top.add(
-            {
-                type = 'sprite-button',
-                name = main_button_name,
-                sprite = 'entity/character',
-                tooltip = {'player_list.tooltip'}
-            }
-        )
-    end
-
-    for _, p in ipairs(game.connected_players) do
-        local frame = p.gui.left[main_frame_name]
-
-        if frame and frame.valid then
-            local data = Gui.get_data(frame)
-            redraw_title(data)
-            redraw_cells(data)
-        end
-    end
+    player.gui.top.add(
+        {
+            type = 'sprite-button',
+            name = main_button_name,
+            sprite = 'entity/character',
+            tooltip = {'player_list.tooltip'}
+        }
+    )
 end
 
-local function player_left()
+local function update_player_list()
     for _, p in ipairs(game.connected_players) do
         local frame = p.gui.left[main_frame_name]
 
@@ -712,8 +698,9 @@ local function player_left()
 end
 
 Event.on_nth_tick(1800, tick)
-Event.add(defines.events.on_player_joined_game, player_joined)
-Event.add(defines.events.on_player_left_game, player_left)
+Event.add(defines.events.on_player_created, player_created)
+Event.add(defines.events.on_player_joined_game, update_player_list)
+Event.add(defines.events.on_player_left_game, update_player_list)
 
 Gui.on_click(main_button_name, toggle)
 

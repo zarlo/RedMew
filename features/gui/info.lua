@@ -222,8 +222,7 @@ local pages = {
             discord_textbox_flow_style.horizontal_align = 'center'
             discord_textbox_flow_style.horizontally_stretchable = true
             discord_textbox_flow.add({type = 'label', caption = 'Discord: '}).style.font = 'default-bold'
-            local discord_textbox =
-                discord_textbox_flow.add {type = 'text-box', text = 'https://redmew.com/discord '}
+            local discord_textbox = discord_textbox_flow.add {type = 'text-box', text = 'https://redmew.com/discord '}
             discord_textbox.read_only = true
             discord_textbox.style.width = 235
             discord_textbox.style.height = 28
@@ -421,7 +420,7 @@ local pages = {
             }
             market_label.style.single_line = false
 
-            grid.add {type = 'sprite', sprite = 'item/small-plane'}
+            grid.add {type = 'sprite', sprite = 'item/player-port'}
             local train_savior = grid.add {type = 'label', caption = {'info.softmods_saviour_label'}}
             local train_savior_style = train_savior.style
             train_savior_style.font = 'default-listbox'
@@ -482,21 +481,6 @@ local pages = {
                     caption = {'info.softmods_tasks_text'}
                 }
                 task_label.style.single_line = false
-            end
-
-            if config.blueprint_helper.enabled then
-                grid.add {type = 'sprite', sprite = 'item/blueprint'}
-                local blueprint = grid.add {type = 'label', caption = {'info.softmods_bp_label'}}
-                local blueprint_style = blueprint.style
-                blueprint_style.font = 'default-listbox'
-                blueprint_style.single_line = false
-                blueprint_style.width = 55
-                local blueprint_label =
-                    grid.add {
-                    type = 'label',
-                    caption = {'info.softmods_bp_text'}
-                }
-                blueprint_label.style.single_line = false
             end
 
             if config.score.enabled then
@@ -629,7 +613,7 @@ local function draw_main_frame(center, player)
     bottom_flow_style.top_padding = 8
     bottom_flow_style.horizontally_stretchable = true
 
-    bottom_flow.add {type = 'button', name = main_button_name, caption = {'common.close_button'}}
+    Gui.make_close_button(bottom_flow, main_button_name)
 
     player.opened = frame
 end
@@ -637,7 +621,7 @@ end
 local function close_main_frame(frame, player)
     upload_changelog(player)
     Gui.destroy(frame)
-    player.gui.top[main_button_name].style = 'icon_button'
+    player.gui.top[main_button_name].style = 'slot_button'
 end
 
 local function reward_player(player, index, message)
@@ -673,10 +657,11 @@ local function toggle(event)
     if main_frame then
         close_main_frame(main_frame, player)
     else
-        main_button.style = 'slot_sized_button'
+        main_button.style = 'highlighted_tool_button'
         local style = main_button.style
-        style.width = 38
-        style.height = 38
+        style.width = 40
+        style.height = 40
+        style.padding = 0
 
         draw_main_frame(center, player)
     end
@@ -688,8 +673,7 @@ local function player_created(event)
         return
     end
 
-    local gui = player.gui
-    gui.top.add(
+    player.gui.top.add(
         {
             type = 'sprite-button',
             name = main_button_name,

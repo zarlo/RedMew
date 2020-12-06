@@ -22,6 +22,8 @@ local tau = math.tau
 local loga = math.log
 local shallow_copy = table.shallow_copy
 local remove = table.remove
+local binary_search = table.binary_search
+local bnot = bit32.bnot
 
 -- helpers
 
@@ -906,6 +908,25 @@ function Builders.remove_map_gen_trees(shape)
     end
 end
 
+-- Removes simple entities such as rocks: https://wiki.factorio.com/Data.raw#simple-entity
+-- Looking for a remove_rocks function? You're welcome ~ Jayefuu
+function Builders.remove_map_gen_simple_entity(shape)
+    return function(x, y, world)
+        local tile = shape(x, y, world)
+
+        if not tile then
+            return tile
+        end
+
+        local wx, wy = world.x, world.y
+        local area = {{wx, wy}, {wx + 1, wy + 1}}
+        local entities = world.surface.find_entities_filtered {area = area, type = 'simple-entity'}
+        destroy_entities(entities)
+
+        return tile
+    end
+end
+
 --- Docs: https://github.com/Refactorio/RedMew/wiki/Using-the-Builders#buildersremove_map_gen_enemies
 function Builders.remove_map_gen_enemies(shape)
     return function(x, y, world)
@@ -1454,11 +1475,30 @@ end
 --- Docs: https://github.com/Refactorio/RedMew/wiki/Using-the-Builders#builderssegment_pattern
 function Builders.segment_pattern(pattern)
     local count = #pattern
+    local count_by_tau = count / tau
 
     return function(x, y, world)
         local angle = atan2(-y, x)
-        local index = floor(angle / tau * count) % count + 1
+        local index = floor(angle * count_by_tau) % count + 1
         local shape = pattern[index] or Builders.empty_shape
+        return shape(x, y, world)
+    end
+end
+
+function Builders.segment_weighted_pattern(pattern)
+    local weights = Builders.prepare_weighted_array(pattern)
+    local total = weights.total * 0.5
+
+    return function(x, y, world)
+        local angle = atan2(-y, x)
+        local i = (angle * inv_pi + 1) * total
+
+        local index = binary_search(weights, i)
+        if index < 0 then
+            index = bnot(index)
+        end
+
+        local shape = pattern[index].shape or Builders.empty_shape
         return shape(x, y, world)
     end
 end

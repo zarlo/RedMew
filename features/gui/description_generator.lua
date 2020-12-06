@@ -70,7 +70,7 @@ local desc_community_info = [[
 ]]
 
 local desc_modded_info = [[
-[img=entity/crash-site-lab-repaired]│[font=default-large-bold] Modded gameplay[/font]
+[img=entity/lab]│[font=default-large-bold] Modded gameplay[/font]
 [virtual-signal=signal-dot]│ This server contains modded gameplay
 [virtual-signal=signal-dot]│ Visit [color=blue]#modded[/color] in our discord to learn more!
 ]]
@@ -213,7 +213,7 @@ local function draw_gui(event)
     left_flow.style.horizontal_align = 'left'
     left_flow.style.horizontally_stretchable = true
 
-    local close_button = left_flow.add {type = 'button', name = close_gui, caption = 'Close'}
+    local close_button = Gui.make_close_button(left_flow, close_gui)
     Gui.set_data(close_button, frame)
 
     local data = {

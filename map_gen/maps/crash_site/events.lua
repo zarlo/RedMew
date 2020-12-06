@@ -290,7 +290,8 @@ local bot_spawn_whitelist = {
 local bot_cause_whitelist = {
     ['character'] = true,
     ['artillery-turret'] = true,
-    ['artillery-wagon'] = true
+    ['artillery-wagon'] = true,
+    ['spidertron'] = true
 }
 
 local function do_bot_spawn(entity_name, entity, event)
@@ -475,5 +476,21 @@ Event.add(
     function(event)
         local player = game.get_player(event.player_index)
         set_timeout_in_ticks(1, spawn_player, player)
+    end
+)
+
+Event.add(
+    defines.events.on_combat_robot_expired,
+    function(event)
+        local entity = event.robot
+        local position = entity.position
+        local owner = event.owner
+        if owner == nil or not owner.valid then
+            return
+        end
+        if entity.force.name == 'enemy' and owner.name == "artillery-wagon" then
+            -- only create a grenade entity if an artillery wagon (the event owner) killed the target that spawned the combabt robot
+            entity.surface.create_entity{name = "cluster-grenade", position=position, target=position, speed=1}
+        end
     end
 )

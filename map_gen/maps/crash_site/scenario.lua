@@ -1,5 +1,5 @@
 require 'map_gen.maps.crash_site.blueprint_extractor'
-require 'map_gen.maps.crash_site.entity_died_events'
+require 'map_gen.maps.crash_site.events'
 require 'map_gen.maps.crash_site.weapon_balance'
 
 local b = require 'map_gen.shared.builders'
@@ -15,8 +15,10 @@ local RS = require 'map_gen.shared.redmew_surface'
 local MGSP = require 'resources.map_gen_settings'
 local RedmewConfig = require 'config'
 local Cutscene = require 'map_gen.maps.crash_site.cutscene'
+local cutscene_surface_settings = require 'map_gen.maps.crash_site.cutscene_surface_settings'
 
 local degrees = math.degrees
+local cutscene_force_name = 'cutscene'
 
 local default_map_gen_settings = {
     MGSP.grass_only,
@@ -140,7 +142,7 @@ local spawn_callback =
 )
 
 local function cutscene_builder(name, x, y)
-    return game.surfaces.cutscene.create_entity {name = name, position = {x, y}, force = game.forces.enemy}
+    return game.surfaces.cutscene.create_entity {name = name, position = {x, y}, force = cutscene_force_name}
 end
 
 local function cutscene_outpost()
@@ -186,7 +188,7 @@ local function init(config)
     local outpost_builder = OutpostBuilder.new(outpost_random)
 
     if on_init then
-        game.create_surface('cutscene', default_map_gen_settings)
+        game.create_surface('cutscene', cutscene_surface_settings)
         game.surfaces.cutscene.always_day = true
         game.surfaces.cutscene.request_to_generate_chunks({0, 0}, 2)
         game.surfaces.cutscene.force_generate_chunk_requests()
@@ -769,6 +771,22 @@ local function init(config)
             upgrade_rate = 0.5,
             upgrade_base_cost = 500,
             upgrade_cost_base = 2,
+            {
+                price = 1000,
+                type= 'airstrike',
+                name = 'airstrike_damage',
+                name_label = {'command_description.crash_site_airstrike_count_name_label', 1},
+                sprite = 'item-group/production',
+                description = {'command_description.crash_site_airstrike_count', 1, 0, "n/a", "n/a"}
+            },
+            {
+                price = 1000,
+                type = 'airstrike',
+                name = 'airstrike_radius',
+                name_label = {'command_description.crash_site_airstrike_radius_name_label', 1},
+                sprite = 'item-group/production',
+                description = {'command_description.crash_site_airstrike_radius', 1, 0, 5}
+            },
             {name = 'wood', price = 1},
             {name = 'iron-plate', price = 2},
             {name = 'stone', price = 2},
@@ -783,9 +801,9 @@ local function init(config)
             {name = 'utility-science-pack', price = 125},
             {
                 price = 100,
-                name = 'small-plane',
+                name = 'player-port',
                 name_label = 'Train Immunity (1x use)',
-                description = 'Each small plane in your inventory will save you from being killed by a train once.'
+                description = 'Each player port in your inventory will save you from being killed by a train once.'
             }
         }
     }
@@ -805,12 +823,17 @@ local function init(config)
         )
     }
 
+    local chest = {
+        callback = outpost_builder.scenario_chest_callback
+    }
+
     local spawn = {
         size = 2,
         [1] = {
             market = market,
+            chest = chest,
             [15] = {entity = {name = 'market', force = 'neutral', callback = 'market'}},
-            [18] = {entity = {name = 'wooden-chest', force = 'player'}}
+            [18] = {entity = {name = 'wooden-chest', force = 'player', callback = 'chest'}}
         },
         [2] = {
             force = 'player',
@@ -838,6 +861,11 @@ local map
 Global.register_init(
     {},
     function(tbl)
+        game.create_force(cutscene_force_name)
+        local surface = game.surfaces[1]
+        surface.map_gen_settings = {width = 2, height = 2}
+        surface.clear()
+
         local seed = RS.get_surface().map_gen_settings.seed
         tbl.outpost_seed = outpost_seed or seed
         tbl.ore_seed = ore_seed or seed
